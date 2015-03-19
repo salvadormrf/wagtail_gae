@@ -1,0 +1,57 @@
+{% load i18n wagtailadmin_tags %}
+{% if last_edits %}
+    <div class="panel nice-padding">{# TODO try moving these classes onto the section tag #}
+        <section>
+            <h2>{% trans "Your most recent edits" %}</h2>
+            <table class="listing listing-page">
+                <col />
+                <col width="15%"/>
+                <col width="15%"/>
+                <thead>
+                    <tr>
+                        <th class="title">{% trans "Title" %}</th>
+                        <th>{% trans "Date" %}</th>
+                        <th>{% trans "Status" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for revision in last_edits %}
+                        <tr>
+                            <td class="title" valign="top">
+                                <h2>
+                                    <a href="{% url 'wagtailadmin_pages_edit' revision.page.id %}" title="{% trans 'Edit this page' %}">{{ revision.page.title }}</a>
+
+                                    {% test_page_is_public revision.page as is_public %}
+                                    {% if not is_public %}
+                                        <span class="indicator privacy-indicator icon icon-no-view" title="{% trans 'This page is protected from public view' %}"></span>
+                                    {% endif %}
+
+                                    {% if revision.page.locked %}
+                                        <span class="indicator locked-indicator icon icon-locked" title="{% trans 'This page is locked to further editing' %}"></span>
+                                    {% endif %}
+                                </h2>
+                                <ul class="actions">
+                                    <li><a href="{% url 'wagtailadmin_pages_edit' revision.page.id %}" class="button button-small">{% trans "Edit" %}</a></li>
+                                    {% if revision.page.has_unpublished_changes %}
+                                        <li><a href="{% url 'wagtailadmin_pages_view_draft' revision.page.id %}" class="button button-small">{% trans 'Draft' %}</a></li>
+                                    {% endif %}
+                                    {% if revision.page.live %}
+                                        <li><a href="{{ revision.page.url }}" class="button button-small">{% trans 'Live' %}</a></li>
+                                    {% endif %}
+                                </ul>
+                            </td>
+                            <td valign="top"><div class="human-readable-date" title="{{ revision.created_at|date:"d M Y H:i" }}">{{ revision.created_at|timesince }} ago</div></td>
+                            <td valign="top">
+                                {% if revision.page.live %}
+                                    <a href="{{ revision.page.url }}" target="_blank" class="status-tag {% if revision.page.status_string != "draft" %}primary{% endif %}">{{ revision.page.status_string }}</a>
+                                {% else %}
+                                    <span class="status-tag {% if revision.page.status_string != "draft" %}primary{% endif %}">{{ revision.page.status_string }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </div>
+{% endif %}

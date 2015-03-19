@@ -1,0 +1,122 @@
+Metadata-Version: 1.1
+Name: django-gaekit
+Version: 0.2.9
+Summary: Collection of backends, wrappers and utilities to enquicken django development on Google App Engine
+Home-page: https://github.com/Beyond-Digital/django-gaekit
+Author: George Whewell
+Author-email: george@bynd.com
+License: BSD
+Description: =============================
+        django-gaekit
+        =============================
+        
+        .. image:: https://badge.fury.io/py/django-gaekit.png
+            :target: http://badge.fury.io/py/django-gaekit
+            
+        .. image:: https://travis-ci.org/georgewhewell/django-gaekit.png?branch=master
+                :target: https://travis-ci.org/Beyond-Digital/django-gaekit
+        
+        .. image:: https://pypip.in/d/django-gaekit/badge.png
+                :target: https://crate.io/packages/django-gaekit?version=latest
+        
+        
+        Collection of backends, wrappers and utilities to enquicken django development on Google App Engine
+        
+        Documentation
+        -------------
+        
+        The full documentation is at http://django-gaekit.rtfd.org.
+        
+        Quickstart
+        ----------
+        
+        Use template from https://github.com/Beyond-Digital/bynd-django-gae
+        
+        To use with virtualenv, add the following to your requirements.txt::
+        
+            django-gaekit==0.2.9
+        
+        To use the storage backend, add the following to your settings module::
+        
+            DEFAULT_FILE_STORAGE = 'gaekit.storages.CloudStorage'
+            GS_BUCKET_NAME = 'bucket_name'
+        
+        To use the cache backend, add the following to your settings module::
+        
+            CACHES = {
+                'default': {
+                    'BACKEND': 'gaekit.caches.GAEMemcachedCache',
+                    'TIMEOUT': 0,
+                }
+            }
+        
+        To import blacklisted modules, in your **local** settings module::
+            
+            from gaekit.boot import break_sandbox
+            break_sandbox()
+        
+        Features
+        --------
+        
+        * Storage Backend using Google Cloud Storage
+        * Cache backend using Memcache
+        * Import blacklisted modules in the SDK (eg sqlite3)
+        
+        
+        
+        
+        
+        History
+        ------
+        0.2.9 (2014-08-13)
+        ++++++++++++++++++
+        
+        * Break out options IMAGESERVICE_DEFAULT_SIZE, IMAGESERVICE_SECURE_URLS and IMAGESERVICE_UPLOAD_HEADERS
+        
+        0.2.8 (2014-08-13)
+        ++++++++++++++++++
+        
+        * Duff release
+        
+        0.2.7 (2014-04-17)
+        ++++++++++++++++++
+        
+        * Add FeedListKeyConstructor for drf_extensions
+        
+        0.1.4 (2014-03-10)
+        ++++++++++++++++++
+        
+        * Add fallback for cloud storage urls
+        
+        0.1.3 (2014-03-10)
+        ++++++++++++++++++
+        
+        * Add exception logging if URL generation fails
+        
+        0.1.2 (2014-03-07)
+        ++++++++++++++++++
+        
+        * Remove utils (lock, memoizer)
+        * Monkeypatch ReadBuffer to add open() stub (fixes issue with easy_thumbnails)
+        
+        0.1.1 (2013-10-10)
+        ++++++++++++++++++
+        
+        * Fix for distributed lock
+        
+        0.1.0 (2013-08-15)
+        ++++++++++++++++++
+        
+        * First release on PyPI.
+Keywords: django-gaekit
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Framework :: Django
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 2
+Classifier: Programming Language :: Python :: 2.6
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.3

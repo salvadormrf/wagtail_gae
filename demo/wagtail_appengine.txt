@@ -1,0 +1,22 @@
+Hot to run wagtail locally with appengine sdk ?
+##############################################
+
+# create database
+mysql -uroot -p
+create database wagtail_gae_demo3 CHARACTER SET utf8 COLLATE utf8_general_ci;
+
+# create virtualenv and install dependencies
+mkvirtualenv wagtail_gae
+
+workon wagtail_gae
+pip install -r requirements.txt
+
+python manage.py migrate
+python manage.py compress
+python manage.py collectstatic
+dev_appserver.py .
+
+Notes:
+- make sure you have PIL installed with libjpeg and libpng support enabled
+- demo/settings/local.py local development, you can use sqlite
+- demo/settings/local_live.py live appengine settings

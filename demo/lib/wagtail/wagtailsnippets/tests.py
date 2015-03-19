@@ -1,0 +1,229 @@
+from django.test import TestCase
+from django.core.urlresolvers import reverse
+from django.db import models
+
+from wagtail.tests.utils import WagtailTestUtils
+from django.test.utils import override_settings
+from wagtail.tests.models import Advert, AlphaSnippet, ZuluSnippet, SnippetChooserModel
+from wagtail.wagtailsnippets.models import register_snippet, SNIPPET_MODELS
+
+from wagtail.wagtailsnippets.views.snippets import (
+    get_snippet_edit_handler
+)
+from wagtail.wagtailcore.models import Page
+
+
+class TestSnippetIndexView(TestCase, WagtailTestUtils):
+    def setUp(self):
+        self.login()
+
+    def get(self, params={}):
+        return self.client.get(reverse('wagtailsnippets_index'), params)
+
+    def test_simple(self):
+        response = self.get()
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'wagtailsnippets/snippets/index.html')
+
+    def test_displays_snippet(self):
+        self.assertContains(self.get(), "Adverts")
+
+
+class TestSnippetListView(TestCase, WagtailTestUtils):
+    def setUp(self):
+        self.login()
+
+    def get(self, params={}):
+        return self.client.get(reverse('wagtailsnippets_list',
+                                       args=('tests', 'advert')),
+                               params)
+
+    def test_simple(self):
+        response = self.get()
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'wagtailsnippets/snippets/type_index.html')
+
+    def test_displays_add_button(self):
+        self.assertContains(self.get(), "Add advert")
+
+
+class TestSnippetCreateView(TestCase, WagtailTestUtils):
+    def setUp(self):
+        self.login()
+
+    def get(self, params={}):
+        return self.client.get(reverse('wagtailsnippets_create',
+                                       args=('tests', 'advert')),
+                               params)
+
+    def post(self, post_data={}):
+        return self.client.post(reverse('wagtailsnippets_create',
+                               args=('tests', 'advert')),
+                               post_data)
+
+    def test_simple(self):
+        response = self.get()
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'wagtailsnippets/snippets/create.html')
+
+    def test_create_invalid(self):
+        response = self.post(post_data={'foo': 'bar'})
+        self.assertContains(response, "The snippet could not be created due to errors.")
+        self.assertContains(response, "This field is required.")
+
+    def test_create(self):
+        response = self.post(post_data={'text': 'test_advert',
+                                        'url': 'http://www.example.com/'})
+        self.assertRedirects(response, reverse('wagtailsnippets_list', args=('tests', 'advert')))
+
+        snippets = Advert.objects.filter(text='test_advert')
+        self.assertEqual(snippets.count(), 1)
+        self.assertEqual(snippets.first().url, 'http://www.example.com/')
+
+
+class TestSnippetEditView(TestCase, WagtailTestUtils):
+    fixtures = ['wagtail/tests/fixtures/test.json']
+
+    def setUp(self):
+        self.test_snippet = Advert.objects.get(id=1)
+        self.login()
+
+    def get(self, params={}):
+        return self.client.get(reverse('wagtailsnippets_edit',
+                                       args=('tests', 'advert', self.test_snippet.id)),
+                               params)
+
+    def post(self, post_data={}):
+        return self.client.post(reverse('wagtailsnippets_edit',
+                                        args=('tests', 'advert', self.test_snippet.id)),
+                                post_data)
+
+    def test_simple(self):
+        response = self.get()
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'wagtailsnippets/snippets/edit.html')
+
+    def test_non_existant_model(self):
+        response = self.client.get(reverse('wagtailsnippets_edit',
+                                            args=('tests', 'foo', self.test_snippet.id)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_nonexistant_id(self):
+        response = self.client.get(reverse('wagtailsnippets_edit',
+                                            args=('tests', 'advert', 999999)))
+        self.assertEqual(response.status_code, 404)
+
+    def test_edit_invalid(self):
+        response = self.post(post_data={'foo': 'bar'})
+        self.assertContains(response, "The snippet could not be saved due to errors.")
+        self.assertContains(response, "This field is required.")
+
+    def test_edit(self):
+        response = self.post(post_data={'text': 'edited_test_advert',
+                                        'url': 'http://www.example.com/edited'})
+        self.assertRedirects(response, reverse('wagtailsnippets_list', args=('tests', 'advert')))
+
+        snippets = Advert.objects.filter(text='edited_test_advert')
+        self.assertEqual(snippets.count(), 1)
+        self.assertEqual(snippets.first().url, 'http://www.example.com/edited')
+
+
+class TestSnippetDelete(TestCase, WagtailTestUtils):
+    fixtures = ['wagtail/tests/fixtures/test.json']
+
+    def setUp(self):
+        self.test_snippet = Advert.objects.get(id=1)
+        self.login()
+
+    def test_delete_get(self):
+        response = self.client.get(reverse('wagtailsnippets_delete', args=('tests', 'advert', self.test_snippet.id, )))
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_post(self):
+        post_data = {'foo': 'bar'} # For some reason, this test doesn't work without a bit of POST data
+        response = self.client.post(reverse('wagtailsnippets_delete', args=('tests', 'advert', self.test_snippet.id, )), post_data)
+
+        # Should be redirected to explorer page
+        self.assertRedirects(response, reverse('wagtailsnippets_list', args=('tests', 'advert')))
+
+        # Check that the page is gone
+        self.assertEqual(Advert.objects.filter(text='test_advert').count(), 0)
+
+
+class TestSnippetChooserPanel(TestCase):
+    fixtures = ['wagtail/tests/fixtures/test.json']
+
+    def setUp(self):
+        model = SnippetChooserModel
+        self.advert_text = 'Test advert text'
+        test_snippet = model.objects.create(
+            advert=Advert.objects.create(text=self.advert_text))
+
+        edit_handler_class = get_snippet_edit_handler(model)
+        form_class = edit_handler_class.get_form_class(model)
+        form = form_class(instance=test_snippet)
+        edit_handler = edit_handler_class(instance=test_snippet, form=form)
+
+        self.snippet_chooser_panel = [
+            panel for panel in edit_handler.children
+            if getattr(panel, 'field_name', None) == 'advert'][0]
+
+    def test_create_snippet_chooser_panel_class(self):
+        self.assertEqual(type(self.snippet_chooser_panel).__name__,
+                         '_SnippetChooserPanel')
+
+    def test_render_as_field(self):
+        self.assertTrue(self.advert_text in self.snippet_chooser_panel.render_as_field())
+
+    def test_render_js(self):
+        self.assertIn('createSnippetChooser("id_advert", "tests/advert");',
+                      self.snippet_chooser_panel.render_as_field())
+
+
+class TestSnippetRegistering(TestCase):
+    def test_register_function(self):
+        class RegisterFunction(models.Model):
+            pass
+        register_snippet(RegisterFunction)
+
+        self.assertIn(RegisterFunction, SNIPPET_MODELS)
+
+    def test_register_decorator(self):
+        @register_snippet
+        class RegisterDecorator(models.Model):
+            pass
+
+        # Misbehaving decorators often return None
+        self.assertIsNotNone(RegisterDecorator)
+        self.assertIn(RegisterDecorator, SNIPPET_MODELS)
+
+
+class TestSnippetOrdering(TestCase):
+    def setUp(self):
+        register_snippet(ZuluSnippet)
+        register_snippet(AlphaSnippet)
+
+    def test_snippets_ordering(self):
+        # Ensure AlphaSnippet is before ZuluSnippet
+        # Cannot check first and last position as other snippets
+        # may get registered elsewhere during test
+        self.assertLess(SNIPPET_MODELS.index(AlphaSnippet),
+                        SNIPPET_MODELS.index(ZuluSnippet))
+
+
+class TestUsageCount(TestCase):
+    fixtures = ['wagtail/tests/fixtures/test.json']
+
+    @override_settings(WAGTAIL_USAGE_COUNT_ENABLED=True)
+    def test_snippet_usage_count(self):
+        advert = Advert.objects.get(id=1)
+        self.assertEqual(advert.get_usage().count(), 2)
+
+
+class TestUsedBy(TestCase):
+    fixtures = ['wagtail/tests/fixtures/test.json']
+
+    @override_settings(WAGTAIL_USAGE_COUNT_ENABLED=True)
+    def test_snippet_used_by(self):
+        advert = Advert.objects.get(id=1)
+        self.assertEqual(type(advert.get_usage()[0]), Page)

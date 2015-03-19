@@ -1,0 +1,34 @@
+{% extends "wagtailadmin/shared/field.html" %}
+{% load i18n %}
+{% comment %}
+    Either the chosen or unchosen div will be shown, depending on the presence
+    of the 'blank' class on the container.
+
+    Any element with the 'action-choose' class will open the page chooser modal
+    when clicked.
+{% endcomment %}
+
+{% block form_field %}
+
+    <div id="{{ field.id_for_label }}-chooser" class="chooser {% block chooser_class %}page-chooser{% endblock %} {% if not is_chosen %}blank{% endif %}">
+
+        <div class="chosen">
+            {% block chosen_state_view %}{% endblock %}
+
+            <div class="actions">
+                {% if not field.field.required %}
+                    <input type="button" class="action-clear button-small button-secondary" value="{% block clear_button_label %}{% trans "Clear choice" %}{% endblock %}">
+                {% endif %}
+                <input type="button" class="action-choose button-small button-secondary" value="{% block choose_another_button_label %}{% trans "Choose another item" %}{% endblock %}">
+            </div>
+        </div>
+
+        <div class="unchosen">
+            <input type="button" class="action-choose button-small button-secondary" value="{% block choose_button_label %}{% trans "Choose an item" %}{% endblock %}">
+        </div>
+
+    </div>
+
+    {{ field }}
+
+{% endblock %}

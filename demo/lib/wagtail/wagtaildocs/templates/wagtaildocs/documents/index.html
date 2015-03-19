@@ -1,0 +1,25 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+{% block titletag %}Documents{% endblock %}
+{% block bodyclass %}menu-documents{% endblock %}
+{% block extra_js %}
+    <script>
+        window.headerSearch = {
+            url: "{% url 'wagtaildocs_index' %}",
+            termInput: "#id_q",
+            targetOutput: "#document-results"
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% trans "Documents" as doc_str %}
+    {% trans "Add a document" as add_doc_str %}
+    {% include "wagtailadmin/shared/header.html" with title=doc_str add_link="wagtaildocs_add_document" icon="doc-full-inverse" add_text=add_doc_str search_url="wagtaildocs_index" %}
+
+    <div class="nice-padding">
+        <div id="document-results" class="documents">
+            {% include "wagtaildocs/documents/results.html" %}
+        </div>
+    </div>
+{% endblock %}
