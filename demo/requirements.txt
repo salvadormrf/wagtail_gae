@@ -1,7 +1,0 @@
-# wagtail with mysql test
-
-#Django>=1.7,<1.8
-MySQL-python==1.2.5
-Pillow==2.7.0
-PyYAML==3.11
-

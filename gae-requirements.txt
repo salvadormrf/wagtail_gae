@@ -1,0 +1,5 @@
+# required external dependencies to be added as external packages
+
+Django==1.7.1
+https://github.com/salvadormrf/wagtail/archive/master.zip
+https://github.com/salvadormrf/django-gaekit/archive/master.zip

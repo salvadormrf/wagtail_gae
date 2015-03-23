@@ -1,0 +1,9 @@
+# for running local dev server
+
+MySQL-python==1.2.5
+PyYAML==3.11
+django-libsass==0.2
+
+# pip install PIL --allow-external PIL --allow-unverified PIL
+PIL==1.1.7
+
