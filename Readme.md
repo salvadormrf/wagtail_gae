@@ -7,7 +7,7 @@ pip install -r dev-requirements.txt --allow-external PIL --allow-unverified PIL
 # download external dependencies
 pip install -r gae-requirements.txt -t lib/
 
-# create mysql database
+# create mysql database (Mysql 5.5)
 mysql -uroot -p
 CREATE DATABASE `wagtail_gae_demo` CHARACTER SET utf8 COLLATE utf8_general_ci;
 
@@ -46,4 +46,12 @@ dev_appserver.py .
     --- FREETYPE2 support available
     *** LITTLECMS support not available
     --------------------------------------------------------------------
+```
+
+#### Add write permissions on bucket for appengine
+```
+sudo apt-get install libffi-dev
+pip install gsutil
+
+gsutil -m acl ch -r -u user@appspot.gserviceaccount.com:W gs://mybucket
 ```

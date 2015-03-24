@@ -11,7 +11,6 @@ COMPRESS_OFFLINE = True
 # CREATE DATABASE `wagtail_gae_mysql` CHARACTER SET utf8 COLLATE utf8_general_ci;
 
 
-# PostgreSQL (Recommended, but requires the psycopg2 library and Postgresql development headers)
 DATABASES = {
      'default': {
          'ENGINE': 'django.db.backends.mysql',
@@ -32,8 +31,6 @@ DATABASES = {
         }  # Now we have a mild degree of confidence :-)
      }
  }
-
-
 
 FILE_UPLOAD_HANDLERS = ('django.core.files.uploadhandler.MemoryFileUploadHandler',)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 262144000 # the django default: 2.5MB

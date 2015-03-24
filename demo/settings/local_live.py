@@ -1,6 +1,9 @@
+DEBUG = False
+TEMPLATE_DEBUG = False
+
 
 DEFAULT_FILE_STORAGE = 'gaekit.storages.CloudStorage'
-GS_BUCKET_NAME = 'wagtaildemo.appspot.com'
+GS_BUCKET_NAME = 'wagtaildemo'
 
 
 COMPRESS_STORAGE = 'compressor.storage.CompressorFileStorage'
@@ -8,7 +11,6 @@ COMPRESS_ENABLED = True
 COMPRESS_OFFLINE = True
 
 
-# PostgreSQL (Recommended, but requires the psycopg2 library and Postgresql development headers)
 DATABASES = {
      'default': {
          'ENGINE': 'django.db.backends.mysql',
@@ -17,7 +19,7 @@ DATABASES = {
          'HOST': '/cloudsql/wagtaildemo:dev',
          'PORT': '',
          'PASSWORD': '',
-         'CONN_MAX_AGE': 600,  # number of seconds database connections should persist for
+         'CONN_MAX_AGE': 0,  # cloudsql can handle only 12 connections per instance
         'OPTIONS': {
             'sql_mode': 'TRADITIONAL',
             'charset': 'utf8',
@@ -33,8 +35,6 @@ DATABASES = {
 FILE_UPLOAD_HANDLERS = ('django.core.files.uploadhandler.MemoryFileUploadHandler',)
 FILE_UPLOAD_MAX_MEMORY_SIZE = 262144000 # the django default: 2.5MB
 
-
-
 CACHES = {
     'default': {
         'BACKEND': 'gaekit.caches.GAEMemcachedCache',
@@ -42,6 +42,12 @@ CACHES = {
     }
 }
 
+TEMPLATE_LOADERS = (
+    ('django.template.loaders.cached.Loader', (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )),
+)
 
 # If we don't have SERVER_SOFTWARE set, we're running migrations,
 # so switch to IP+username/password access

@@ -7,13 +7,17 @@ https://docs.djangoproject.com/en/1.7/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.7/ref/settings/
 """
-
+import os
+import sys
 from os.path import abspath, dirname, join
 
 
 # Absolute filesystem path to the Django project directory:
 PROJECT_ROOT = dirname(dirname(dirname(abspath(__file__))))
 
+# Add vendor folder and apps folder
+sys.path.append(os.path.join(PROJECT_ROOT, 'lib'))
+sys.path.append(os.path.join(PROJECT_ROOT, 'apps'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,7 +31,7 @@ DEBUG = True
 
 TEMPLATE_DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -45,6 +49,9 @@ INSTALLED_APPS = (
     'taggit',
     'modelcluster',
 
+    # style override
+    #'apps.coreadmin',
+
     'wagtail.wagtailcore',
     'wagtail.wagtailadmin',
     'wagtail.wagtaildocs',
@@ -59,9 +66,10 @@ INSTALLED_APPS = (
     'wagtail.contrib.wagtailstyleguide',
     "wagtail.contrib.wagtailsitemaps",
 
-    #'coresettings',
-    #'coremenus',
-    #'core',
+    #'apps.coresettings',
+    #'apps.corecategories',
+    #'apps.coreforms',
+    #'apps.core',
 )
 
 MIDDLEWARE_CLASSES = (
