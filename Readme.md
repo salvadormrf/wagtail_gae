@@ -1,3 +1,5 @@
+#### DEPRECATED, please use the most up to date project https://github.com/salvadormrf/vagrant-gae-wagtail
+
 ### Run wagtail with Google App Engine SDK
 ```
 # create virtualenv for local development
